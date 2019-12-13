@@ -22,7 +22,7 @@ const BuildControls = props => (
         ingredientRemovedFromBurger={() =>
           props.ingredientRemovedFromBurger(ctrl.type)
         }
-        disabled={props.disabled[ctrl.type]}
+        isIngredientAdded={props.ingredientAddedInfo[ctrl.type]}
       />
     ))}
     <button

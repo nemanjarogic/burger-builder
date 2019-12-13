@@ -2,14 +2,16 @@ import React, { Fragment } from "react";
 import Button from "../../UI/Button/Button";
 
 const OrderSummary = props => {
-  const ingredientSummary = Object.keys(props.ingredients).map(igKey => {
-    return (
-      <li key={igKey}>
-        <span style={{ textTransform: "capitalize" }}>{igKey}</span>:{" "}
-        {props.ingredients[igKey]}
-      </li>
-    );
-  });
+  const ingredientSummary = Object.keys(props.ingredients).map(
+    ingredientType => {
+      return (
+        <li key={ingredientType}>
+          <span style={{ textTransform: "capitalize" }}>{ingredientType}</span>:{" "}
+          {props.ingredients[ingredientType]}
+        </li>
+      );
+    }
+  );
 
   return (
     <Fragment>
@@ -23,10 +25,10 @@ const OrderSummary = props => {
         </strong>
       </p>
       <p>Continue to Checkout</p>
-      <Button btnType="Danger" clicked={props.purchaseCanceled}>
+      <Button btnType="Danger" clicked={props.orderCanceled}>
         CANCEL
       </Button>
-      <Button btnType="Success" clicked={props.purchaseContinued}>
+      <Button btnType="Success" clicked={props.orderContinued}>
         CONTINUE
       </Button>
     </Fragment>

@@ -4,12 +4,17 @@ import styles from "./Modal.module.css";
 
 const Modal = props => (
   <Fragment>
-    <Backdrop show={props.show} clicked={props.modalClosed} />
+    <Backdrop
+      isBackdropActive={props.isModalVisible}
+      clicked={props.closeModalHandler}
+    />
     <div
       className={styles.Modal}
       style={{
-        transform: props.show ? "translateY(0)" : "translateY(-100vh)",
-        opacity: props.show ? "1" : "0"
+        transform: props.isModalVisible
+          ? "translateY(0)"
+          : "translateY(-100vh)",
+        opacity: props.isModalVisible ? "1" : "0"
       }}
     >
       {props.children}

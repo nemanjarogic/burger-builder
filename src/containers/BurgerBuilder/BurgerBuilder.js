@@ -25,22 +25,6 @@ class BurgerBuilder extends Component {
     isPurchasingInitiated: false
   };
 
-  purchaseHandler = () => {
-    this.setState({ isPurchasingInitiated: true });
-  };
-
-  updatePurchaseState = ingredients => {
-    const sum = Object.keys(ingredients)
-      .map(igKey => {
-        return ingredients[igKey];
-      })
-      .reduce((sum, el) => {
-        return sum + el;
-      }, 0);
-
-    this.setState({ isPurchasable: sum > 0 });
-  };
-
   addIngredientHandler = type => {
     const oldCount = this.state.ingredients[type];
     const updatedCount = oldCount + 1;
@@ -50,13 +34,12 @@ class BurgerBuilder extends Component {
 
     updatedIngredients[type] = updatedCount;
     const priceAddition = INGREDIENT_PRICES[type];
-    const oldPrice = this.state.totalPrice;
 
-    this.setState({
-      totalPrice: oldPrice + priceAddition,
-      ingredients: updatedIngredients
-    });
-    this.updatePurchaseState(updatedIngredients);
+    this.setState(prevState => ({
+      totalPrice: prevState.totalPrice + priceAddition,
+      ingredients: updatedIngredients,
+      isPurchasable: true
+    }));
   };
 
   removeIngredientHandler = type => {
@@ -72,20 +55,35 @@ class BurgerBuilder extends Component {
 
     updatedIngredients[type] = updatedCount;
     const priceDeduction = INGREDIENT_PRICES[type];
-    const oldPrice = this.state.totalPrice;
 
-    this.setState({
-      totalPrice: oldPrice - priceDeduction,
+    this.setState(prevState => ({
+      totalPrice: prevState.totalPrice - priceDeduction,
       ingredients: updatedIngredients
-    });
-    this.updatePurchaseState(updatedIngredients);
+    }));
+    this.updateIsPurchasableState(updatedIngredients);
   };
 
-  purchaseCancelHandler = () => {
+  updateIsPurchasableState = ingredients => {
+    const ingredientsPrice = Object.keys(ingredients)
+      .map(ingredientType => {
+        return ingredients[ingredientType];
+      })
+      .reduce((sum, price) => {
+        return sum + price;
+      }, 0);
+
+    this.setState({ isPurchasable: ingredientsPrice > 0 });
+  };
+
+  startOrderHandler = () => {
+    this.setState({ isPurchasingInitiated: true });
+  };
+
+  cancelOrderHandler = () => {
     this.setState({ isPurchasingInitiated: false });
   };
 
-  purchaseContinueHandler = () => {
+  continueOrderHandler = () => {
     alert("Purchase is continued...");
   };
 
@@ -100,24 +98,24 @@ class BurgerBuilder extends Component {
     return (
       <Fragment>
         <Modal
-          show={this.state.isPurchasingInitiated}
-          modalClosed={this.purchaseCancelHandler}
+          isModalVisible={this.state.isPurchasingInitiated}
+          closeModalHandler={this.cancelOrderHandler}
         >
           <OrderSummary
             ingredients={this.state.ingredients}
-            purchaseCanceled={this.purchaseCancelHandler}
-            purchaseContinued={this.purchaseContinueHandler}
+            orderCanceled={this.cancelOrderHandler}
+            orderContinued={this.continueOrderHandler}
             price={this.state.totalPrice}
           />
         </Modal>
         <Burger ingredients={this.state.ingredients} />
         <BuildControls
-          ingredientAdded={this.addIngredientHandler}
-          ingredientRemoved={this.removeIngredientHandler}
+          ingredientAddedToBurger={this.addIngredientHandler}
+          ingredientRemovedFromBurger={this.removeIngredientHandler}
           disabled={disabledInfo}
           isPurchasable={this.state.isPurchasable}
           price={this.state.totalPrice}
-          ordered={this.purchaseHandler}
+          startOrderHandler={this.startOrderHandler}
         />
       </Fragment>
     );

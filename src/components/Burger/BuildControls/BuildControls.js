@@ -2,7 +2,7 @@ import React from "react";
 import BuildControl from "./BuildControl/BuildControl";
 import styles from "./BuildControls.module.css";
 
-const controls = [
+const ingredientControls = [
   { label: "Salad", type: "salad" },
   { label: "Bacon", type: "bacon" },
   { label: "Cheese", type: "cheese" },
@@ -14,19 +14,21 @@ const BuildControls = props => (
     <p>
       Current Price: <strong>{props.price.toFixed(2)}</strong>
     </p>
-    {controls.map(ctrl => (
+    {ingredientControls.map(ctrl => (
       <BuildControl
         key={ctrl.label}
         label={ctrl.label}
-        added={() => props.ingredientAdded(ctrl.type)}
-        removed={() => props.ingredientRemoved(ctrl.type)}
+        ingredientAddedToBurger={() => props.ingredientAddedToBurger(ctrl.type)}
+        ingredientRemovedFromBurger={() =>
+          props.ingredientRemovedFromBurger(ctrl.type)
+        }
         disabled={props.disabled[ctrl.type]}
       />
     ))}
     <button
       disabled={!props.isPurchasable}
       className={styles.OrderButton}
-      onClick={props.ordered}
+      onClick={props.startOrderHandler}
     >
       ORDER NOW
     </button>

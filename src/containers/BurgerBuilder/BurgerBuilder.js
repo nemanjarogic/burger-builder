@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+
 import Burger from "./../../components/Burger/Burger";
 import BuildControls from "./../../components/Burger/BuildControls/BuildControls";
 import Modal from "../../components/UI/Modal/Modal";
@@ -20,7 +21,7 @@ class BurgerBuilder extends Component {
       meat: 0
     },
     totalPrice: 4,
-    purchasable: false,
+    isPurchasable: false,
     isPurchasingInitiated: false
   };
 
@@ -37,7 +38,7 @@ class BurgerBuilder extends Component {
         return sum + el;
       }, 0);
 
-    this.setState({ purchasable: sum > 0 });
+    this.setState({ isPurchasable: sum > 0 });
   };
 
   addIngredientHandler = type => {
@@ -114,7 +115,7 @@ class BurgerBuilder extends Component {
           ingredientAdded={this.addIngredientHandler}
           ingredientRemoved={this.removeIngredientHandler}
           disabled={disabledInfo}
-          purchasable={this.state.purchasable}
+          isPurchasable={this.state.isPurchasable}
           price={this.state.totalPrice}
           ordered={this.purchaseHandler}
         />

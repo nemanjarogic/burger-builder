@@ -1,12 +1,12 @@
 import React, { Fragment } from "react";
 import Backdrop from "../Backdrop/Backdrop";
-import classes from "./Modal.module.css";
+import styles from "./Modal.module.css";
 
-const modal = props => (
+const Modal = props => (
   <Fragment>
     <Backdrop show={props.show} clicked={props.modalClosed} />
     <div
-      className={classes.Modal}
+      className={styles.Modal}
       style={{
         transform: props.show ? "translateY(0)" : "translateY(-100vh)",
         opacity: props.show ? "1" : "0"
@@ -17,4 +17,4 @@ const modal = props => (
   </Fragment>
 );
 
-export default modal;
+export default Modal;

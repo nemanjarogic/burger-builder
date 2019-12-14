@@ -1,4 +1,5 @@
 import React, { Fragment } from "react";
+import PropTypes from "prop-types";
 import Logo from "../../Logo/Logo";
 import NavigationItems from "../NavigationItems/NavigationItems";
 import Backdrop from "../../UI/Backdrop/Backdrop";
@@ -27,6 +28,11 @@ const SideDrawer = props => {
       </div>
     </Fragment>
   );
+};
+
+SideDrawer.propTypes = {
+  isSideDrawerVisible: PropTypes.bool.isRequired,
+  closeHandler: PropTypes.func.isRequired
 };
 
 export default SideDrawer;

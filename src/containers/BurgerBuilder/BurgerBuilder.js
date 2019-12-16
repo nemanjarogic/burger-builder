@@ -1,9 +1,11 @@
 import React, { Component, Fragment } from "react";
+import axios from "../../axios-orders";
 
 import Burger from "./../../components/Burger/Burger";
 import BuildControls from "./../../components/Burger/BuildControls/BuildControls";
 import Modal from "../../components/UI/Modal/Modal";
 import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary";
+import Spinner from "../../components/UI/Spinner/Spinner";
 
 const INGREDIENT_PRICES = {
   salad: 0.5,
@@ -22,7 +24,8 @@ class BurgerBuilder extends Component {
     },
     totalPrice: 4,
     isPurchasable: false,
-    isPurchasingInitiated: false
+    isPurchasingInitiated: false,
+    isOrderConfirmationProcessing: false
   };
 
   addIngredientHandler = type => {
@@ -84,7 +87,37 @@ class BurgerBuilder extends Component {
   };
 
   continueOrderHandler = () => {
-    alert("Purchase is continued...");
+    this.setState({ isOrderConfirmationProcessing: true });
+
+    const order = {
+      ingredients: this.state.ingredients,
+      price: this.state.totalPrice,
+      customer: {
+        name: "Nemanja Rogic",
+        address: {
+          street: "Test",
+          zipCode: "21000",
+          coutnry: "Serbia"
+        },
+        email: "test@test.com"
+      },
+      deliveryMethod: "fastest"
+    };
+
+    axios
+      .post("/orders.json", order)
+      .then(response =>
+        this.setState({
+          isOrderConfirmationProcessing: false,
+          isPurchasingInitiated: false
+        })
+      )
+      .catch(error =>
+        this.setState({
+          isOrderConfirmationProcessing: false,
+          isPurchasingInitiated: false
+        })
+      );
   };
 
   render() {
@@ -95,18 +128,26 @@ class BurgerBuilder extends Component {
       ingredientAddedInfo[type] = ingredientAddedInfo[type] > 0;
     }
 
+    let orderSummary = (
+      <OrderSummary
+        ingredients={this.state.ingredients}
+        orderCanceled={this.cancelOrderHandler}
+        orderContinued={this.continueOrderHandler}
+        price={this.state.totalPrice}
+      />
+    );
+
+    if (this.state.isOrderConfirmationProcessing) {
+      orderSummary = <Spinner />;
+    }
+
     return (
       <Fragment>
         <Modal
           isModalVisible={this.state.isPurchasingInitiated}
           closeModalHandler={this.cancelOrderHandler}
         >
-          <OrderSummary
-            ingredients={this.state.ingredients}
-            orderCanceled={this.cancelOrderHandler}
-            orderContinued={this.continueOrderHandler}
-            price={this.state.totalPrice}
-          />
+          {orderSummary}
         </Modal>
         <Burger ingredients={this.state.ingredients} />
         <BuildControls

@@ -4,7 +4,10 @@ import styles from "./Modal.module.css";
 
 class Modal extends Component {
   shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.isModalVisible !== this.props.isModalVisible;
+    return (
+      nextProps.isModalVisible !== this.props.isModalVisible ||
+      nextProps.children !== this.props.children
+    );
   }
 
   render() {

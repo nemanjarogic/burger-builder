@@ -26,6 +26,7 @@ class BurgerBuilder extends Component {
   };
 
   componentDidMount() {
+    console.log(this.props);
     axios
       .get("/ingredients.json")
       .then(response => {
@@ -95,7 +96,19 @@ class BurgerBuilder extends Component {
   };
 
   continueOrderHandler = () => {
-    this.setState({ isOrderConfirmationProcessing: true });
+    const queryParams = [];
+    for (let ingredient in this.state.ingredients) {
+      queryParams.push(
+        encodeURIComponent(ingredient) +
+          "=" +
+          encodeURIComponent(this.state.ingredients[ingredient])
+      );
+    }
+    this.props.history.push({
+      pathname: "/checkout",
+      search: "?" + queryParams.join("&")
+    });
+    /* this.setState({ isOrderConfirmationProcessing: true });
 
     const order = {
       ingredients: this.state.ingredients,
@@ -125,7 +138,7 @@ class BurgerBuilder extends Component {
           isOrderConfirmationProcessing: false,
           isPurchasingInitiated: false
         })
-      );
+      ); */
   };
 
   render() {

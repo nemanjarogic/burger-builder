@@ -1,6 +1,5 @@
 import React from "react";
 import styles from "./Order.module.css";
-import { checkPropTypes } from "prop-types";
 
 const Order = props => {
   const ingredients = [];

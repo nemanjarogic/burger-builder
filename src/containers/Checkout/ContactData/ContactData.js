@@ -1,5 +1,7 @@
 import React, { Component } from "react";
+import axios from "../../../axios-orders";
 import Button from "../../../components/UI/Button/Button";
+import Spinner from "../../../components/UI/Spinner/Spinner";
 import styles from "./ContactData.module.css";
 
 class ContactData extends Component {
@@ -9,40 +11,87 @@ class ContactData extends Component {
     address: {
       street: "",
       postalCode: ""
-    }
+    },
+    isOrderConfirmationProcessing: false,
+    totalPrice: 0
+  };
+
+  submitOrderHandler = event => {
+    event.preventDefault();
+
+    this.setState({ isOrderConfirmationProcessing: true });
+
+    const order = {
+      ingredients: this.props.ingredients,
+      price: this.props.totalPrice,
+      customer: {
+        name: "Nemanja Rogic",
+        address: {
+          street: "Test",
+          zipCode: "21000",
+          coutnry: "Serbia"
+        },
+        email: "test@test.com"
+      },
+      deliveryMethod: "fastest"
+    };
+
+    axios
+      .post("/orders.json", order)
+      .then(response => {
+        this.setState({
+          isOrderConfirmationProcessing: false
+        });
+        this.props.history.push("/");
+      })
+      .catch(error =>
+        this.setState({
+          isOrderConfirmationProcessing: false
+        })
+      );
   };
 
   render() {
+    let form = (
+      <form>
+        <input
+          type="text"
+          name="name"
+          placeholder="Your Name"
+          className={styles.Input}
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Your Email"
+          className={styles.Input}
+        />
+        <input
+          type="text"
+          name="street"
+          placeholder="Street"
+          className={styles.Input}
+        />
+        <input
+          type="text"
+          name="postalCode"
+          placeholder="Postal Code"
+          className={styles.Input}
+        />
+        <Button btnType="Success" clicked={this.submitOrderHandler}>
+          ORDER
+        </Button>
+      </form>
+    );
+
+    if (this.state.isOrderConfirmationProcessing) {
+      form = <Spinner />;
+    }
+
     return (
       <div className={styles.ContactData}>
         <h4>Enter your Contact Data</h4>
-        <form>
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Name"
-            className={styles.Input}
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email"
-            className={styles.Input}
-          />
-          <input
-            type="text"
-            name="street"
-            placeholder="Street"
-            className={styles.Input}
-          />
-          <input
-            type="text"
-            name="postalCode"
-            placeholder="Postal Code"
-            className={styles.Input}
-          />
-          <Button btnType="Success">ORDER</Button>
-        </form>
+        {form}
       </div>
     );
   }

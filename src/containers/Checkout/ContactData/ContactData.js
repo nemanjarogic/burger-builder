@@ -8,6 +8,14 @@ import styles from "./ContactData.module.css";
 class ContactData extends Component {
   constructor(props) {
     super(props);
+
+    const zipCodeValidation = {
+      required: true,
+      minLength: 3,
+      maxLength: 8,
+      validationMessage: "Zip Code must be between 3 and 8 characters!"
+    };
+
     this.state = {
       name: "",
       email: "",
@@ -20,22 +28,30 @@ class ContactData extends Component {
       orderForm: {
         name: this.initInputProperty("text", "Your Name"),
         street: this.initInputProperty("text", "Street"),
-        zipCode: this.initInputProperty("text", "Zip Code"),
+        zipCode: this.initInputProperty("text", "Zip Code", zipCodeValidation),
         country: this.initInputProperty("text", "Country"),
         email: this.initInputProperty("text", "Your E-mail"),
         deliveryMethod: this.initSelectProperty(["fastest", "cheapest"])
-      }
+      },
+      isFormValid: false
     };
   }
 
-  initInputProperty = (elementType, placeholder, initialValue = "") => {
+  initInputProperty = (
+    elementType,
+    placeholder,
+    validation = { required: true, validationMessage: "Please enter a value!" }
+  ) => {
     return {
       elementType: "input",
       elementConfig: {
         type: elementType,
         placeholder: placeholder
       },
-      value: initialValue
+      value: "",
+      validation: validation,
+      isValid: false,
+      isModifiedByUser: false
     };
   };
 
@@ -52,7 +68,9 @@ class ContactData extends Component {
       elementConfig: {
         options
       },
-      value: ""
+      value: options[0].value,
+      validation: {},
+      isValid: true
     };
   };
 
@@ -69,9 +87,36 @@ class ContactData extends Component {
     };
 
     updatedFormElement.value = event.target.value;
+    updatedFormElement.isModifiedByUser = true;
+    updatedFormElement.isValid = this.checkInputValidity(
+      updatedFormElement.value,
+      updatedFormElement.validation
+    );
     updatedOrderForm[inputId] = updatedFormElement;
 
-    this.setState({ orderForm: updatedOrderForm });
+    let isFormValid = true;
+    for (let inputId in updatedOrderForm) {
+      isFormValid = updatedOrderForm[inputId].isValid && isFormValid;
+    }
+
+    this.setState({ orderForm: updatedOrderForm, isFormValid: isFormValid });
+  };
+
+  checkInputValidity = (value, rules) => {
+    let isValid = true;
+    if (rules.required) {
+      isValid = value.trim() !== "";
+    }
+
+    if (rules.minLength) {
+      isValid = value.length >= rules.minLength && isValid;
+    }
+
+    if (rules.maxLength) {
+      isValid = value.length <= rules.maxLength && isValid;
+    }
+
+    return isValid;
   };
 
   submitOrderHandler = event => {
@@ -122,13 +167,20 @@ class ContactData extends Component {
             elementType={formElement.config.elementType}
             elementConfig={formElement.config.elementConfig}
             value={formElement.config.value}
+            isValid={formElement.config.isValid}
+            validation={formElement.config.validation}
+            isModifiedByUser={formElement.config.isModifiedByUser}
             inputChangedHandler={event =>
               this.inputChangedHandler(event, formElement.id)
             }
           />
         ))}
 
-        <Button btnType="Success" clicked={this.submitOrderHandler}>
+        <Button
+          btnType="Success"
+          clicked={this.submitOrderHandler}
+          disabled={!this.state.isFormValid}
+        >
           ORDER
         </Button>
       </form>

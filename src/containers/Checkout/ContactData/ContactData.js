@@ -1,8 +1,11 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+
 import axios from "../../../axios-orders";
 import Button from "../../../components/UI/Button/Button";
 import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
+
 import styles from "./ContactData.module.css";
 
 class ContactData extends Component {
@@ -24,7 +27,6 @@ class ContactData extends Component {
         postalCode: ""
       },
       isOrderConfirmationProcessing: false,
-      totalPrice: 0,
       orderForm: {
         name: this.initInputProperty("text", "Your Name"),
         street: this.initInputProperty("text", "Street"),
@@ -199,4 +201,11 @@ class ContactData extends Component {
   }
 }
 
-export default ContactData;
+const mapStateToProps = state => {
+  return {
+    ingredients: state.ingredients,
+    totalPrice: state.totalPrice
+  };
+};
+
+export default connect(mapStateToProps)(ContactData);

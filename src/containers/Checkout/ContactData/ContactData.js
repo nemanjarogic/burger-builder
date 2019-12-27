@@ -5,6 +5,8 @@ import axios from "../../../axios-orders";
 import Button from "../../../components/UI/Button/Button";
 import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import * as actions from "../../../store/actions/index";
 
 import styles from "./ContactData.module.css";
 
@@ -26,7 +28,6 @@ class ContactData extends Component {
         street: "",
         postalCode: ""
       },
-      isOrderConfirmationProcessing: false,
       orderForm: {
         name: this.initInputProperty("text", "Your Name"),
         street: this.initInputProperty("text", "Street"),
@@ -124,8 +125,6 @@ class ContactData extends Component {
   submitOrderHandler = event => {
     event.preventDefault();
 
-    this.setState({ isOrderConfirmationProcessing: true });
-
     const userFormData = {};
     for (let formElementId in this.state.orderForm) {
       userFormData[formElementId] = this.state.orderForm[formElementId].value;
@@ -136,20 +135,7 @@ class ContactData extends Component {
       price: this.props.totalPrice,
       orderData: userFormData
     };
-
-    axios
-      .post("/orders.json", order)
-      .then(response => {
-        this.setState({
-          isOrderConfirmationProcessing: false
-        });
-        this.props.history.push("/");
-      })
-      .catch(error =>
-        this.setState({
-          isOrderConfirmationProcessing: false
-        })
-      );
+    this.props.submitBurgerOrder(order);
   };
 
   render() {
@@ -188,7 +174,7 @@ class ContactData extends Component {
       </form>
     );
 
-    if (this.state.isOrderConfirmationProcessing) {
+    if (this.props.isOrderConfirmationProcessing) {
       form = <Spinner />;
     }
 
@@ -203,9 +189,20 @@ class ContactData extends Component {
 
 const mapStateToProps = state => {
   return {
-    ingredients: state.ingredients,
-    totalPrice: state.totalPrice
+    ingredients: state.burgerBuilder.ingredients,
+    totalPrice: state.burgerBuilder.totalPrice,
+    isOrderConfirmationProcessing: state.order.isOrderConfirmationProcessing
   };
 };
 
-export default connect(mapStateToProps)(ContactData);
+const mapDispatchToProps = dispatch => {
+  return {
+    submitBurgerOrder: orderData =>
+      dispatch(actions.purchaseBurgerRequested(orderData))
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withErrorHandler(ContactData, axios));

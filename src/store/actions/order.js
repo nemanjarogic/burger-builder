@@ -22,7 +22,7 @@ export const purchaseBurgerFailed = error => {
   };
 };
 
-export const purchaseBurgerRequested = orderData => {
+export const purchaseBurgerRequestedByUser = orderData => {
   return dispatch => {
     dispatch(purchaseBurgerStarted());
     axios
@@ -33,5 +33,53 @@ export const purchaseBurgerRequested = orderData => {
       .catch(error => {
         dispatch(purchaseBurgerFailed(error));
       });
+  };
+};
+
+export const initPurchasingInfo = () => {
+  return {
+    type: actionTypes.INIT_PURCHASING_INFO
+  };
+};
+
+export const fetchOrdersStarted = () => {
+  return {
+    type: actionTypes.FETCH_ORDERS_STARTED
+  };
+};
+
+export const fetchOrders = () => {
+  return dispatch => {
+    dispatch(fetchOrdersStarted());
+    axios
+      .get("/orders.json")
+      .then(res => {
+        const fetchedOrders = [];
+        for (let key in res.data) {
+          fetchedOrders.push({
+            ...res.data[key],
+            id: key
+          });
+        }
+
+        dispatch(fetchOrdersSucceed(fetchedOrders));
+      })
+      .catch(err => {
+        dispatch(fetchOrdersFailed(err));
+      });
+  };
+};
+
+export const fetchOrdersSucceed = orders => {
+  return {
+    type: actionTypes.FETCH_ORDERS_SUCCEEDED,
+    orders: orders
+  };
+};
+
+export const fetchOrdersFailed = error => {
+  return {
+    type: actionTypes.FETCH_ORDERS_FAILED,
+    error: error
   };
 };

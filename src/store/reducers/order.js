@@ -1,4 +1,5 @@
 import * as actionTypes from "../actions/actionTypes";
+import { updateObject } from "../utility";
 
 const initialState = {
   orders: [],
@@ -6,51 +7,59 @@ const initialState = {
   isOrderPurchased: false
 };
 
+const purchaseBurgerStarted = (state, action) => {
+  return updateObject(state, { isOrderConfirmationProcessing: true });
+};
+
+const purchaseBurgerSucceeded = (state, action) => {
+  const newOrder = updateObject(action.orderData, { id: action.orderId });
+
+  return updateObject(state, {
+    isOrderConfirmationProcessing: false,
+    isOrderPurchased: true,
+    orders: state.orders.concat(newOrder)
+  });
+};
+
+const purchaseBurgerFailed = (state, action) => {
+  return updateObject(state, { isOrderConfirmationProcessing: false });
+};
+
+const initPurchasingInfo = (state, action) => {
+  return updateObject(state, { isOrderPurchased: false });
+};
+
+const fetchOrdersStarted = (state, action) => {
+  return updateObject(state, { isLoading: true });
+};
+
+const fetchOrdersSucceeded = (state, action) => {
+  return updateObject(state, {
+    orders: action.orders,
+    isLoading: false
+  });
+};
+
+const fetchOrdersFailed = (state, action) => {
+  return updateObject(state, { isLoading: false });
+};
+
 const orderReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.PURCHASE_BURGER_STARTED:
-      return {
-        ...state,
-        isOrderConfirmationProcessing: true
-      };
+      return purchaseBurgerStarted(state, action);
     case actionTypes.PURCHASE_BURGER_SUCCEEDED:
-      const newOrder = {
-        ...action.orderData,
-        id: action.orderId
-      };
-
-      return {
-        ...state,
-        isOrderConfirmationProcessing: false,
-        isOrderPurchased: true,
-        orders: state.orders.concat(newOrder)
-      };
+      return purchaseBurgerSucceeded(state, action);
     case actionTypes.PURCHASE_BURGER_FAILED:
-      return {
-        ...state,
-        isOrderConfirmationProcessing: false
-      };
+      return purchaseBurgerFailed(state, action);
     case actionTypes.INIT_PURCHASING_INFO:
-      return {
-        ...state,
-        isOrderPurchased: false
-      };
+      return initPurchasingInfo(state, action);
     case actionTypes.FETCH_ORDERS_STARTED:
-      return {
-        ...state,
-        isLoading: true
-      };
+      return fetchOrdersStarted(state, action);
     case actionTypes.FETCH_ORDERS_SUCCEEDED:
-      return {
-        ...state,
-        orders: action.orders,
-        isLoading: false
-      };
+      return fetchOrdersSucceeded(state, action);
     case actionTypes.FETCH_ORDERS_FAILED:
-      return {
-        ...state,
-        isLoading: false
-      };
+      return fetchOrdersFailed(state, action);
     default:
       return state;
   }

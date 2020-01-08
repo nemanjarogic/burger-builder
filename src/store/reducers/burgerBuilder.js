@@ -1,4 +1,5 @@
 import * as actionTypes from "../actions/actionTypes";
+import { updateObject } from "../utility";
 
 const initialBurgerPrice = 4;
 
@@ -15,44 +16,54 @@ const INGREDIENT_PRICES = {
   bacon: 0.7
 };
 
+const updateIngredientAndPrice = (isIngredientAdded, ingredientType, state) => {
+  let ingredientCount, updatedPrice;
+  if (isIngredientAdded) {
+    ingredientCount = state.ingredients[ingredientType] + 1;
+    updatedPrice = state.totalPrice + INGREDIENT_PRICES[ingredientType];
+  } else {
+    ingredientCount = state.ingredients[ingredientType] - 1;
+    updatedPrice = state.totalPrice - INGREDIENT_PRICES[ingredientType];
+  }
+
+  const updatedIngredient = { [ingredientType]: ingredientCount };
+  const updatedIngredients = updateObject(state.ingredients, updatedIngredient);
+  const updatedState = {
+    ingredients: updatedIngredients,
+    totalPrice: updatedPrice
+  };
+
+  return updateObject(state, updatedState);
+};
+
+const setIngredients = (state, action) => {
+  return updateObject(state, {
+    ingredients: {
+      //define correct order of ingredients
+      salad: action.ingredients.salad,
+      bacon: action.ingredients.bacon,
+      cheese: action.ingredients.cheese,
+      meat: action.ingredients.meat
+    },
+    isInError: false,
+    totalPrice: initialBurgerPrice
+  });
+};
+
+const fetchIngredientsFailed = (state, action) => {
+  return updateObject(state, { isInError: true });
+};
+
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.ADD_INGREDIENT:
-      return {
-        ...state,
-        ingredients: {
-          ...state.ingredients,
-          [action.ingredientType]: state.ingredients[action.ingredientType] + 1
-        },
-        totalPrice: state.totalPrice + INGREDIENT_PRICES[action.ingredientType]
-      };
+      return updateIngredientAndPrice(true, action.ingredientType, state);
     case actionTypes.REMOVE_INGREDIENT:
-      return {
-        ...state,
-        ingredients: {
-          ...state.ingredients,
-          [action.ingredientType]: state.ingredients[action.ingredientType] - 1
-        },
-        totalPrice: state.totalPrice - INGREDIENT_PRICES[action.ingredientType]
-      };
+      return updateIngredientAndPrice(false, action.ingredientType, state);
     case actionTypes.SET_INGREDIENTS:
-      return {
-        ...state,
-        ingredients: {
-          //define correct order of ingredients
-          salad: action.ingredients.salad,
-          bacon: action.ingredients.bacon,
-          cheese: action.ingredients.cheese,
-          meat: action.ingredients.meat
-        },
-        isInError: false,
-        totalPrice: initialBurgerPrice
-      };
+      return setIngredients(state, action);
     case actionTypes.FETCH_INGREDIENTS_FAILED:
-      return {
-        ...state,
-        isInError: true
-      };
+      return fetchIngredientsFailed(state, action);
     default:
       return state;
   }

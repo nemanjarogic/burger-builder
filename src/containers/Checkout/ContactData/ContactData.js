@@ -15,7 +15,7 @@ class ContactData extends Component {
     super(props);
 
     const zipCodeValidation = {
-      required: true,
+      isRequired: true,
       minLength: 3,
       maxLength: 8,
       validationMessage: "Zip Code must be between 3 and 8 characters!"
@@ -43,7 +43,10 @@ class ContactData extends Component {
   initInputProperty = (
     elementType,
     placeholder,
-    validation = { required: true, validationMessage: "Please enter a value!" }
+    validation = {
+      isRequired: true,
+      validationMessage: "Please enter a value!"
+    }
   ) => {
     return {
       elementType: "input",
@@ -107,7 +110,7 @@ class ContactData extends Component {
 
   checkInputValidity = (value, rules) => {
     let isValid = true;
-    if (rules.required) {
+    if (rules.isRequired) {
       isValid = value.trim() !== "";
     }
 

@@ -14,5 +14,6 @@ export {
   registerUser,
   signInUser,
   signOutUser,
-  setAuthRedirectPath
+  setAuthRedirectPath,
+  checkAuthState
 } from "./authentication";

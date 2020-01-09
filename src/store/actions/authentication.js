@@ -43,6 +43,10 @@ export const signInUser = (email, password) => {
 };
 
 export const signOutUser = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("expirationDate");
+  localStorage.removeItem("userId");
+
   return {
     type: actionTypes.AUTHENTICATION_SIGN_OUT
   };
@@ -63,6 +67,28 @@ export const setAuthRedirectPath = path => {
   };
 };
 
+export const checkAuthState = () => {
+  return dispatch => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      dispatch(signOutUser());
+      return;
+    }
+
+    const expirationDate = new Date(localStorage.getItem("expirationDate"));
+    if (expirationDate > new Date()) {
+      dispatch(authSucceeded(token, localStorage.getItem("userId")));
+      dispatch(
+        checkAuthTimeout(
+          (expirationDate.getTime() - new Date().getTime()) / 1000
+        )
+      );
+    } else {
+      dispatch(signOutUser());
+    }
+  };
+};
+
 const handleFirebaseAuthRequest = (email, password, apiUrl, dispatch) => {
   const authData = {
     email,
@@ -73,6 +99,13 @@ const handleFirebaseAuthRequest = (email, password, apiUrl, dispatch) => {
   axios
     .post(apiUrl, authData)
     .then(response => {
+      const tokenExpirationDate = new Date(
+        new Date().getTime() + response.data.expiresIn * 1000
+      );
+      localStorage.setItem("token", response.data.idToken);
+      localStorage.setItem("expirationDate", tokenExpirationDate);
+      localStorage.setItem("userId", response.data.localId);
+
       dispatch(authSucceeded(response.data.idToken, response.data.localId));
       dispatch(checkAuthTimeout(response.data.expiresIn));
     })

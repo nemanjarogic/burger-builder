@@ -10,4 +10,9 @@ export {
   fetchOrders
 } from "./order";
 
-export { registerUser, signInUser, signOutUser } from "./authentication";
+export {
+  registerUser,
+  signInUser,
+  signOutUser,
+  setAuthRedirectPath
+} from "./authentication";

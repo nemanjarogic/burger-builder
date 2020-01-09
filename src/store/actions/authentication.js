@@ -56,6 +56,13 @@ export const checkAuthTimeout = expirationTime => {
   };
 };
 
+export const setAuthRedirectPath = path => {
+  return {
+    type: actionTypes.SET_AUTHENTICATION_REDIRECT_PATH,
+    path
+  };
+};
+
 const handleFirebaseAuthRequest = (email, password, apiUrl, dispatch) => {
   const authData = {
     email,

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Redirect } from "react-router-dom";
 
 import * as actions from "../../store/actions/index";
 import { getErrorMessage } from "../../shared/firebaseErrorCodeMapper";
@@ -40,6 +41,15 @@ class Authentication extends Component {
       },
       isInRegisterMode: false
     };
+  }
+
+  componentDidMount() {
+    if (
+      !this.props.isBurgerBuildingStarted &&
+      this.props.authRedirectPath !== "/"
+    ) {
+      this.props.setAuthRedirectPath();
+    }
   }
 
   initInputProperty = (
@@ -167,8 +177,14 @@ class Authentication extends Component {
       errorMessage = <p>{getErrorMessage(this.props.error.message)}</p>;
     }
 
+    let authRedirect = null;
+    if (this.props.isUserAuthenticated) {
+      authRedirect = <Redirect to={this.props.authRedirectPath} />;
+    }
+
     return (
       <div className={styles.Auth}>
+        {authRedirect}
         {errorMessage}
         <form onSubmit={this.submitHandler}>
           {form}
@@ -187,7 +203,10 @@ class Authentication extends Component {
 const mapStateToProps = state => {
   return {
     isLoading: state.authentication.isLoading,
-    error: state.authentication.error
+    error: state.authentication.error,
+    isUserAuthenticated: state.authentication.token !== null,
+    isBurgerBuildingStarted: state.burgerBuilder.isBurgerBuildingStarted,
+    authRedirectPath: state.authentication.authRedirectPath
   };
 };
 
@@ -196,7 +215,8 @@ const mapDispatchToProps = dispatch => {
     registerUser: (email, password) =>
       dispatch(actions.registerUser(email, password)),
     signInUser: (email, password) =>
-      dispatch(actions.signInUser(email, password))
+      dispatch(actions.signInUser(email, password)),
+    setAuthRedirectPath: () => dispatch(actions.setAuthRedirectPath("/"))
   };
 };
 

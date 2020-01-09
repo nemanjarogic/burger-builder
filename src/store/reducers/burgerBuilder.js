@@ -6,7 +6,8 @@ const initialBurgerPrice = 4;
 const initialState = {
   ingredients: null,
   totalPrice: initialBurgerPrice,
-  isInError: false
+  isInError: false,
+  isBurgerBuildingStarted: false
 };
 
 const INGREDIENT_PRICES = {
@@ -30,7 +31,8 @@ const updateIngredientAndPrice = (isIngredientAdded, ingredientType, state) => {
   const updatedIngredients = updateObject(state.ingredients, updatedIngredient);
   const updatedState = {
     ingredients: updatedIngredients,
-    totalPrice: updatedPrice
+    totalPrice: updatedPrice,
+    isBurgerBuildingStarted: true
   };
 
   return updateObject(state, updatedState);
@@ -46,7 +48,8 @@ const setIngredients = (state, action) => {
       meat: action.ingredients.meat
     },
     isInError: false,
-    totalPrice: initialBurgerPrice
+    totalPrice: initialBurgerPrice,
+    isBurgerBuildingStarted: false
   });
 };
 

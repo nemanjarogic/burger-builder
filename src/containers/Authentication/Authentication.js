@@ -2,8 +2,10 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 
 import * as actions from "../../store/actions/index";
+import { getErrorMessage } from "../../shared/firebaseErrorCodeMapper";
 import Input from "../../components/UI/Input/Input";
 import Button from "../../components/UI/Button/Button";
+import Spinner from "../../components/UI/Spinner/Spinner";
 
 import styles from "./Authentication.module.css";
 
@@ -36,7 +38,7 @@ class Authentication extends Component {
           passwordValidation
         )
       },
-      isInRegisterMode: true
+      isInRegisterMode: false
     };
   }
 
@@ -141,7 +143,7 @@ class Authentication extends Component {
       });
     }
 
-    const form = formElements.map(formElement => (
+    let form = formElements.map(formElement => (
       <Input
         key={formElement.id}
         elementType={formElement.config.elementType}
@@ -156,8 +158,18 @@ class Authentication extends Component {
       />
     ));
 
+    if (this.props.isLoading) {
+      form = <Spinner />;
+    }
+
+    let errorMessage = null;
+    if (this.props.error) {
+      errorMessage = <p>{getErrorMessage(this.props.error.message)}</p>;
+    }
+
     return (
       <div className={styles.Auth}>
+        {errorMessage}
         <form onSubmit={this.submitHandler}>
           {form}
           <Button btnType="Success" clicked={this.submitOrderHandler}>
@@ -172,6 +184,13 @@ class Authentication extends Component {
   }
 }
 
+const mapStateToProps = state => {
+  return {
+    isLoading: state.authentication.isLoading,
+    error: state.authentication.error
+  };
+};
+
 const mapDispatchToProps = dispatch => {
   return {
     registerUser: (email, password) =>
@@ -181,4 +200,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(null, mapDispatchToProps)(Authentication);
+export default connect(mapStateToProps, mapDispatchToProps)(Authentication);

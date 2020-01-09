@@ -42,6 +42,20 @@ export const signInUser = (email, password) => {
   };
 };
 
+export const signOutUser = () => {
+  return {
+    type: actionTypes.AUTHENTICATION_SIGN_OUT
+  };
+};
+
+export const checkAuthTimeout = expirationTime => {
+  return dispatch => {
+    setTimeout(() => {
+      dispatch(signOutUser());
+    }, expirationTime * 1000);
+  };
+};
+
 const handleFirebaseAuthRequest = (email, password, apiUrl, dispatch) => {
   const authData = {
     email,
@@ -52,13 +66,10 @@ const handleFirebaseAuthRequest = (email, password, apiUrl, dispatch) => {
   axios
     .post(apiUrl, authData)
     .then(response => {
-      console.log("User authentication succeeded.");
-      console.log(response);
       dispatch(authSucceeded(response.data.idToken, response.data.localId));
+      dispatch(checkAuthTimeout(response.data.expiresIn));
     })
     .catch(err => {
-      console.log("Failed to authenthicate user.");
-      console.log(err);
-      dispatch(authFailed(err));
+      dispatch(authFailed(err.response.data.error));
     });
 };

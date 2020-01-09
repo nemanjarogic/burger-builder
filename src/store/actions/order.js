@@ -22,11 +22,11 @@ export const purchaseBurgerFailed = error => {
   };
 };
 
-export const purchaseBurgerRequestedByUser = orderData => {
+export const purchaseBurgerRequestedByUser = (orderData, token) => {
   return dispatch => {
     dispatch(purchaseBurgerStarted());
     axios
-      .post("/orders.json", orderData)
+      .post(`/orders.json?auth=${token}`, orderData)
       .then(response => {
         dispatch(purchaseBurgerSucceeded(response.data.name, orderData));
       })
@@ -48,11 +48,11 @@ export const fetchOrdersStarted = () => {
   };
 };
 
-export const fetchOrders = () => {
+export const fetchOrders = token => {
   return dispatch => {
     dispatch(fetchOrdersStarted());
     axios
-      .get("/orders.json")
+      .get(`/orders.json?auth=${token}`)
       .then(res => {
         const fetchedOrders = [];
         for (let key in res.data) {

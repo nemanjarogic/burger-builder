@@ -3,10 +3,16 @@ import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 
 import * as actions from "../../store/actions/index";
+import { updateObject } from "../../shared/utility";
 import { getErrorMessage } from "../../shared/firebaseErrorCodeMapper";
 import Input from "../../components/UI/Input/Input";
 import Button from "../../components/UI/Button/Button";
 import Spinner from "../../components/UI/Spinner/Spinner";
+import {
+  checkInputValidity,
+  getEmailValidationRules,
+  getPasswordValidationRules
+} from "../../shared/validation";
 
 import styles from "./Authentication.module.css";
 
@@ -14,29 +20,17 @@ class Authentication extends Component {
   constructor(props) {
     super(props);
 
-    const emailValidation = {
-      isRequired: true,
-      isEmail: true,
-      validationMessage: "Please enter valid email format!"
-    };
-
-    const passwordValidation = {
-      isRequired: true,
-      minLength: 6,
-      validationMessage: "Password must be at least 6 charachters long!"
-    };
-
     this.state = {
       controls: {
         email: this.initInputProperty(
           "email",
           "Email Address",
-          emailValidation
+          getEmailValidationRules()
         ),
         password: this.initInputProperty(
           "password",
           "Password",
-          passwordValidation
+          getPasswordValidationRules()
         )
       },
       isInRegisterMode: false
@@ -74,51 +68,32 @@ class Authentication extends Component {
   };
 
   inputChangedHandler = (event, controlName) => {
-    const updatedControls = {
+    const updatedControls = updateObject(this.state.controls, {
+      [controlName]: updateObject(this.state.controls[controlName], {
+        value: event.target.value,
+        isValid: checkInputValidity(
+          event.target.value,
+          this.state.controls[controlName].validation
+        ),
+        isModifiedByUser: true
+      })
+    });
+
+    // Old way how can we update controls without updateObject utility function
+    /*const updatedControls = {
       ...this.state.controls,
       [controlName]: {
         ...this.state.controls[controlName],
         value: event.target.value,
-        isValid: this.checkInputValidity(
+        isValid: checkInputValidity(
           event.target.value,
           this.state.controls[controlName].validation
         ),
         isModifiedByUser: true
       }
-    };
+    };*/
 
     this.setState({ controls: updatedControls });
-  };
-
-  checkInputValidity = (value, rules) => {
-    let isValid = true;
-    if (!rules) {
-      return true;
-    }
-
-    if (rules.isRequired) {
-      isValid = value.trim() !== "";
-    }
-
-    if (rules.minLength) {
-      isValid = value.length >= rules.minLength && isValid;
-    }
-
-    if (rules.maxLength) {
-      isValid = value.length <= rules.maxLength && isValid;
-    }
-
-    if (rules.isEmail) {
-      const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-      isValid = pattern.test(value) && isValid;
-    }
-
-    if (rules.isNumeric) {
-      const pattern = /^\d+$/;
-      isValid = pattern.test(value) && isValid;
-    }
-
-    return isValid;
   };
 
   submitHandler = event => {

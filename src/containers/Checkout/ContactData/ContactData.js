@@ -7,6 +7,10 @@ import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 import * as actions from "../../../store/actions/index";
+import {
+  checkInputValidity,
+  getEmailValidationRules
+} from "../../../shared/validation";
 
 import styles from "./ContactData.module.css";
 
@@ -33,7 +37,11 @@ class ContactData extends Component {
         street: this.initInputProperty("text", "Street"),
         zipCode: this.initInputProperty("text", "Zip Code", zipCodeValidation),
         country: this.initInputProperty("text", "Country"),
-        email: this.initInputProperty("text", "Your E-mail"),
+        email: this.initInputProperty(
+          "text",
+          "Your E-mail",
+          getEmailValidationRules()
+        ),
         deliveryMethod: this.initSelectProperty(["fastest", "cheapest"])
       },
       isFormValid: false
@@ -94,7 +102,7 @@ class ContactData extends Component {
 
     updatedFormElement.value = event.target.value;
     updatedFormElement.isModifiedByUser = true;
-    updatedFormElement.isValid = this.checkInputValidity(
+    updatedFormElement.isValid = checkInputValidity(
       updatedFormElement.value,
       updatedFormElement.validation
     );
@@ -106,23 +114,6 @@ class ContactData extends Component {
     }
 
     this.setState({ orderForm: updatedOrderForm, isFormValid: isFormValid });
-  };
-
-  checkInputValidity = (value, rules) => {
-    let isValid = true;
-    if (rules.isRequired) {
-      isValid = value.trim() !== "";
-    }
-
-    if (rules.minLength) {
-      isValid = value.length >= rules.minLength && isValid;
-    }
-
-    if (rules.maxLength) {
-      isValid = value.length <= rules.maxLength && isValid;
-    }
-
-    return isValid;
   };
 
   submitOrderHandler = event => {

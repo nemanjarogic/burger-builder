@@ -18,7 +18,7 @@ const SideDrawer = props => {
         isBackdropActive={props.isSideDrawerVisible}
         clicked={props.closeHandler}
       />
-      <div className={attachedClasses.join(" ")}>
+      <div className={attachedClasses.join(" ")} onClick={props.closeHandler}>
         <div className={styles.Logo}>
           <Logo />
         </div>

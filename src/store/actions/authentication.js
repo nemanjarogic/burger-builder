@@ -3,13 +3,13 @@ import axios from "axios";
 
 export const authStarted = () => {
   return {
-    type: actionTypes.AUTHENTICATION_STARTED
+    type: actionTypes.AUTH_STARTED
   };
 };
 
 export const authSucceeded = (token, userId) => {
   return {
-    type: actionTypes.AUTHENTICATION_SUCCEEDED,
+    type: actionTypes.AUTH_SUCCEEDED,
     token,
     userId
   };
@@ -17,7 +17,7 @@ export const authSucceeded = (token, userId) => {
 
 export const authFailed = error => {
   return {
-    type: actionTypes.AUTHENTICATION_FAILED,
+    type: actionTypes.AUTH_FAILED,
     error
   };
 };
@@ -41,20 +41,21 @@ export const signInUser = (email, password) => {
 };
 
 export const signOutUser = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("expirationDate");
-  localStorage.removeItem("userId");
-
   return {
-    type: actionTypes.AUTHENTICATION_SIGN_OUT
+    type: actionTypes.AUTH_INIT_SIGN_OUT
+  };
+};
+
+export const completeSignOutUser = () => {
+  return {
+    type: actionTypes.AUTH_COMPLETE_SIGN_OUT
   };
 };
 
 export const checkAuthTimeout = expirationTime => {
-  return dispatch => {
-    setTimeout(() => {
-      dispatch(signOutUser());
-    }, expirationTime * 1000);
+  return {
+    type: actionTypes.AUTH_CHECK_TIMEOUT,
+    expirationTime
   };
 };
 

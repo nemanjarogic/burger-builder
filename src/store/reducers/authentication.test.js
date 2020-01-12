@@ -19,7 +19,7 @@ describe("Authentication reducer", () => {
 
   it("should store user token upon login", () => {
     const successLoginPayload = {
-      type: actionTypes.AUTHENTICATION_SUCCEEDED,
+      type: actionTypes.AUTH_SUCCEEDED,
       token: "test-token",
       userId: "test-user-id"
     };

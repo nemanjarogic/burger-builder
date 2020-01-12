@@ -22,7 +22,7 @@ const asyncAuthentication = asyncComponent(() => {
 
 class App extends Component {
   componentDidMount() {
-    this.props.checkAuthState();
+    this.props.checkInitSessionState();
   }
 
   render() {
@@ -63,7 +63,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    checkAuthState: () => dispatch(actions.checkAuthState())
+    checkInitSessionState: () => dispatch(actions.checkInitSessionState())
   };
 };
 

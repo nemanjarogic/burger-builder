@@ -16,5 +16,9 @@ export {
   signOutUser,
   completeSignOutUser,
   setAuthRedirectPath,
-  checkAuthState
+  checkInitSessionState,
+  authStarted,
+  authSucceeded,
+  authFailed,
+  checkSessionTimeout
 } from "./authentication";

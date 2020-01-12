@@ -1,5 +1,4 @@
 import * as actionTypes from "./actionTypes";
-import axios from "axios";
 
 export const authStarted = () => {
   return {
@@ -23,20 +22,20 @@ export const authFailed = error => {
 };
 
 export const registerUser = (email, password) => {
-  return dispatch => {
-    dispatch(authStarted());
-
-    const apiUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.REACT_APP_FIREBASE_API_KEY}`;
-    handleFirebaseAuthRequest(email, password, apiUrl, dispatch);
+  return {
+    type: actionTypes.AUTH_SIGN_IN_REGISTER,
+    apiUrl: `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.REACT_APP_FIREBASE_API_KEY}`,
+    email,
+    password
   };
 };
 
 export const signInUser = (email, password) => {
-  return dispatch => {
-    dispatch(authStarted());
-
-    const apiUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.REACT_APP_FIREBASE_API_KEY}`;
-    handleFirebaseAuthRequest(email, password, apiUrl, dispatch);
+  return {
+    type: actionTypes.AUTH_SIGN_IN_REGISTER,
+    apiUrl: `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.REACT_APP_FIREBASE_API_KEY}`,
+    email,
+    password
   };
 };
 
@@ -52,9 +51,9 @@ export const completeSignOutUser = () => {
   };
 };
 
-export const checkAuthTimeout = expirationTime => {
+export const checkSessionTimeout = expirationTime => {
   return {
-    type: actionTypes.AUTH_CHECK_TIMEOUT,
+    type: actionTypes.AUTH_CHECK_SESSION_TIMEOUT,
     expirationTime
   };
 };
@@ -66,49 +65,8 @@ export const setAuthRedirectPath = path => {
   };
 };
 
-export const checkAuthState = () => {
-  return dispatch => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      dispatch(signOutUser());
-      return;
-    }
-
-    const expirationDate = new Date(localStorage.getItem("expirationDate"));
-    if (expirationDate > new Date()) {
-      dispatch(authSucceeded(token, localStorage.getItem("userId")));
-      dispatch(
-        checkAuthTimeout(
-          (expirationDate.getTime() - new Date().getTime()) / 1000
-        )
-      );
-    } else {
-      dispatch(signOutUser());
-    }
+export const checkInitSessionState = () => {
+  return {
+    type: actionTypes.AUTH_CHECK_INIT_SESSION_STATE
   };
-};
-
-const handleFirebaseAuthRequest = (email, password, apiUrl, dispatch) => {
-  const authData = {
-    email,
-    password,
-    returnSecureToken: true
-  };
-
-  axios
-    .post(apiUrl, authData)
-    .then(response => {
-      const tokenExpirationDate = new Date(
-        new Date().getTime() + response.data.expiresIn * 1000
-      );
-      localStorage.setItem("token", response.data.idToken);
-      localStorage.setItem("expirationDate", tokenExpirationDate);
-      localStorage.setItem("userId", response.data.localId);
-
-      dispatch(authSucceeded(response.data.idToken, response.data.localId));
-      dispatch(checkAuthTimeout(response.data.expiresIn));
-    })
-    .catch(err => {
-      dispatch(authFailed(err.response.data.error));
-    });
 };

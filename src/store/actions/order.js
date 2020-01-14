@@ -61,7 +61,6 @@ export const fetchOrders = (token, userId) => {
             id: key
           });
         }
-
         dispatch(fetchOrdersSucceed(fetchedOrders));
       })
       .catch(err => {

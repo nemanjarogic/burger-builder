@@ -4,6 +4,7 @@ import axios from "axios";
 import * as actions from "../actions/index";
 
 export function* signOutSaga(action) {
+  // call function make our generator testable
   yield call([localStorage, "removeItem"], "token");
   yield call([localStorage, "removeItem"], "expirationDate");
   yield call([localStorage, "removeItem"], "userId");

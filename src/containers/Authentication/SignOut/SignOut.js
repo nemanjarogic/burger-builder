@@ -1,23 +1,17 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
 
 import * as actions from "../../../store/actions/index";
 
-class SignOut extends Component {
-  componentDidMount() {
-    this.props.signOutUser();
-  }
+const SignOut = () => {
+  const dispatch = useDispatch();
 
-  render() {
-    return <Redirect to="/" />;
-  }
-}
+  useEffect(() => {
+    dispatch(actions.signOutUser());
+  }, [dispatch]);
 
-const mapDispatchToProps = dispatch => {
-  return {
-    signOutUser: () => dispatch(actions.signOutUser())
-  };
+  return <Redirect to="/" />;
 };
 
-export default connect(null, mapDispatchToProps)(SignOut);
+export default SignOut;

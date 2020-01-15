@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import axios from "../../../axios-orders";
 import Button from "../../../components/UI/Button/Button";
@@ -8,90 +8,48 @@ import Input from "../../../components/UI/Input/Input";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 import * as actions from "../../../store/actions/index";
 import {
+  initInputProperty,
+  initSelectProperty
+} from "../../../shared/form/formInitialization";
+import {
   checkInputValidity,
   getEmailValidationRules
-} from "../../../shared/validation";
+} from "../../../shared/form/formValidation";
 
 import styles from "./ContactData.module.css";
 
-class ContactData extends Component {
-  constructor(props) {
-    super(props);
+const ContactData = props => {
+  const ingredients = useSelector(state => state.burgerBuilder.ingredients);
+  const totalPrice = useSelector(state => state.burgerBuilder.totalPrice);
+  const token = useSelector(state => state.authentication.token);
+  const userId = useSelector(state => state.authentication.userId);
+  const isOrderConfirmationProcessing = useSelector(
+    state => state.order.isOrderConfirmationProcessing
+  );
 
-    const zipCodeValidation = {
-      isRequired: true,
-      minLength: 3,
-      maxLength: 8,
-      validationMessage: "Zip Code must be between 3 and 8 characters!"
-    };
+  const dispatch = useDispatch();
 
-    this.state = {
-      name: "",
-      email: "",
-      address: {
-        street: "",
-        postalCode: ""
-      },
-      orderForm: {
-        name: this.initInputProperty("text", "Your Name"),
-        street: this.initInputProperty("text", "Street"),
-        zipCode: this.initInputProperty("text", "Zip Code", zipCodeValidation),
-        country: this.initInputProperty("text", "Country"),
-        email: this.initInputProperty(
-          "text",
-          "Your E-mail",
-          getEmailValidationRules()
-        ),
-        deliveryMethod: this.initSelectProperty(["fastest", "cheapest"])
-      },
-      isFormValid: false
-    };
-  }
-
-  initInputProperty = (
-    elementType,
-    placeholder,
-    validation = {
-      isRequired: true,
-      validationMessage: "Please enter a value!"
-    }
-  ) => {
-    return {
-      elementType: "input",
-      elementConfig: {
-        type: elementType,
-        placeholder: placeholder
-      },
-      value: "",
-      validation: validation,
-      isValid: false,
-      isModifiedByUser: false
-    };
+  const zipCodeValidation = {
+    isRequired: true,
+    minLength: 3,
+    maxLength: 8,
+    validationMessage: "Zip Code must be between 3 and 8 characters!"
   };
 
-  initSelectProperty = selectOptions => {
-    const options = selectOptions.map(item => {
-      return {
-        value: item,
-        displayValue: item.charAt(0).toUpperCase() + item.slice(1)
-      };
-    });
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [orderForm, setOrderForm] = useState({
+    name: initInputProperty("text", "Your Name"),
+    street: initInputProperty("text", "Street"),
+    zipCode: initInputProperty("text", "Zip Code", zipCodeValidation),
+    country: initInputProperty("text", "Country"),
+    email: initInputProperty("text", "Your E-mail", getEmailValidationRules()),
+    deliveryMethod: initSelectProperty(["fastest", "cheapest"])
+  });
 
-    return {
-      elementType: "select",
-      elementConfig: {
-        options
-      },
-      value: options[0].value,
-      validation: {},
-      isValid: true
-    };
-  };
-
-  inputChangedHandler = (event, inputId) => {
+  const inputChangedHandler = (event, inputId) => {
     //Spread operator doesn't clone object deeply (on every level)
     const updatedOrderForm = {
-      ...this.state.orderForm
+      ...orderForm
     };
 
     //We want to change just value property, so this is enough
@@ -113,93 +71,72 @@ class ContactData extends Component {
       isFormValid = updatedOrderForm[inputId].isValid && isFormValid;
     }
 
-    this.setState({ orderForm: updatedOrderForm, isFormValid: isFormValid });
+    setOrderForm(updatedOrderForm);
+    setIsFormValid(isFormValid);
   };
 
-  submitOrderHandler = event => {
+  const submitOrderHandler = event => {
     event.preventDefault();
 
     const userFormData = {};
-    for (let formElementId in this.state.orderForm) {
-      userFormData[formElementId] = this.state.orderForm[formElementId].value;
+    for (let formElementId in orderForm) {
+      userFormData[formElementId] = orderForm[formElementId].value;
     }
 
     const order = {
-      ingredients: this.props.ingredients,
-      price: this.props.totalPrice,
+      ingredients: ingredients,
+      price: totalPrice,
       orderData: userFormData,
-      userId: this.props.userId
+      userId: userId
     };
-    this.props.submitBurgerOrder(order, this.props.token);
+    dispatch(actions.purchaseBurgerRequestedByUser(order, token));
   };
 
-  render() {
-    const formElements = [];
-    for (let key in this.state.orderForm) {
-      formElements.push({
-        id: key,
-        config: this.state.orderForm[key]
-      });
-    }
-
-    let form = (
-      <form onSubmit={this.submitOrderHandler}>
-        {formElements.map(formElement => (
-          <Input
-            key={formElement.id}
-            elementType={formElement.config.elementType}
-            elementConfig={formElement.config.elementConfig}
-            value={formElement.config.value}
-            isValid={formElement.config.isValid}
-            validation={formElement.config.validation}
-            isModifiedByUser={formElement.config.isModifiedByUser}
-            inputChangedHandler={event =>
-              this.inputChangedHandler(event, formElement.id)
-            }
-          />
-        ))}
-
-        <Button
-          btnType="Success"
-          clicked={this.submitOrderHandler}
-          disabled={!this.state.isFormValid}
-        >
-          ORDER
-        </Button>
-      </form>
-    );
-
-    if (this.props.isOrderConfirmationProcessing) {
-      form = <Spinner />;
-    }
-
-    return (
-      <div className={styles.ContactData}>
-        <h4>Enter your Contact Data</h4>
-        {form}
-      </div>
-    );
+  const formElements = [];
+  for (let key in orderForm) {
+    formElements.push({
+      id: key,
+      config: orderForm[key]
+    });
   }
-}
 
-const mapStateToProps = state => {
-  return {
-    ingredients: state.burgerBuilder.ingredients,
-    totalPrice: state.burgerBuilder.totalPrice,
-    isOrderConfirmationProcessing: state.order.isOrderConfirmationProcessing,
-    token: state.authentication.token,
-    userId: state.authentication.userId
-  };
+  let form = (
+    <form onSubmit={submitOrderHandler}>
+      {formElements.map(formElement => (
+        <Input
+          key={formElement.id}
+          elementType={formElement.config.elementType}
+          elementConfig={formElement.config.elementConfig}
+          value={formElement.config.value}
+          isValid={formElement.config.isValid}
+          validation={formElement.config.validation}
+          isModifiedByUser={formElement.config.isModifiedByUser}
+          inputChangedHandler={event =>
+            inputChangedHandler(event, formElement.id)
+          }
+        />
+      ))}
+
+      <Button
+        btnType="Success"
+        clicked={submitOrderHandler}
+        disabled={!isFormValid}
+      >
+        ORDER
+      </Button>
+    </form>
+  );
+
+  if (isOrderConfirmationProcessing) {
+    form = <Spinner />;
+  }
+
+  return (
+    <div className={styles.ContactData}>
+      <h4>Enter your Contact Data</h4>
+      {form}
+    </div>
+  );
 };
 
-const mapDispatchToProps = dispatch => {
-  return {
-    submitBurgerOrder: (orderData, token) =>
-      dispatch(actions.purchaseBurgerRequestedByUser(orderData, token))
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withErrorHandler(ContactData, axios));
+export default withErrorHandler(ContactData, axios);

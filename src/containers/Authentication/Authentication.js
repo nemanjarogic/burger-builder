@@ -18,7 +18,7 @@ import { initInputProperty } from "../../shared/form/formInitialization";
 import styles from "./Authentication.module.css";
 
 const Authentication = () => {
-  const [isInRegisterMode, setisInRegisterMode] = useState(false);
+  const [isInRegisterMode, setIsInRegisterMode] = useState(false);
   const [authForm, setAuthForm] = useState({
     email: initInputProperty(
       "email",
@@ -104,7 +104,7 @@ const Authentication = () => {
   };
 
   const switchAuthModeHandler = () => {
-    setisInRegisterMode(!isInRegisterMode);
+    setIsInRegisterMode(!isInRegisterMode);
   };
 
   const formElements = [];

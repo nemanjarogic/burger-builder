@@ -4,13 +4,13 @@ Single page application where authenticated users can build and order their own 
 
 ## How to run
 
-__Make sure that Node.js, NPM are installed__
+Make sure that Node.js, NPM are installed
 
 1) Install the dependencies using `npm install`
 2) Put your firebase web API key in .env file (root folder) using `REACT_APP_FIREBASE_API_KEY` 
 3) Run `npm start`
 4) Configure firebase to use proper authentication. Default configuration implies 'Email/password' sign-in method and database rules set to:
-`
+```
 {
   "rules": {
     "ingredients": {
@@ -24,6 +24,6 @@ __Make sure that Node.js, NPM are installed__
       }
   }
 }
-`
+```
 
 Feel free to play around.
